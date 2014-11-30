@@ -293,8 +293,10 @@ public interface NodeTypes
     public static final int EXECUTE_STATEMENT_NODE = 237;
     public static final int DEALLOCATE_STATEMENT_NODE = 238;
 
+    public static final int BINARY_EXP_OPERATOR_NODE = 239;
+
     // Final value in set, keep up to date!
-    public static final int FINAL_VALUE = DEALLOCATE_STATEMENT_NODE;
+    public static final int FINAL_VALUE = BINARY_EXP_OPERATOR_NODE;
 
     /**
      * Extensions to this interface can use nodetypes > MAX_NODE_TYPE with out fear of collision

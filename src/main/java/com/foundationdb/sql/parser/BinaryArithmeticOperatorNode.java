@@ -94,7 +94,12 @@ public class BinaryArithmeticOperatorNode extends BinaryOperatorNode
             operator = "div";
             methodName = "div";
             break;
-            
+
+        case NodeTypes.BINARY_EXP_OPERATOR_NODE:
+            operator = "^";
+            methodName = "exp";
+            break;
+
         default:
             assert false : "Unexpected nodeType:" + nodeType;
         }

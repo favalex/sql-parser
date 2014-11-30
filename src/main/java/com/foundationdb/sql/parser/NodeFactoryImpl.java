@@ -221,6 +221,7 @@ public final class NodeFactoryImpl extends NodeFactory
         case NodeTypes.BINARY_PLUS_OPERATOR_NODE:
         case NodeTypes.BINARY_TIMES_OPERATOR_NODE:
         case NodeTypes.BINARY_DIVIDE_OPERATOR_NODE:
+        case NodeTypes.BINARY_EXP_OPERATOR_NODE:
         case NodeTypes.MOD_OPERATOR_NODE:
             return NodeNames.BINARY_ARITHMETIC_OPERATOR_NODE_NAME;
 

@@ -59,7 +59,7 @@ public class BinaryOperatorNode extends ValueNode
         PLUS, MINUS, TIMES, DIVIDE, CONCATENATE, MOD, DIV,
         EQ, NE, GT, GE, LT, LE, AND, OR, LIKE, LTRIM, TRIM, RTRIM,
         BITAND, BITOR, BITXOR, LEFT_SHIFT, RIGHT_SHIFT,
-        LEFT, RIGHT
+        LEFT, RIGHT, EXP,
     }
 
     protected ValueNode leftOperand;

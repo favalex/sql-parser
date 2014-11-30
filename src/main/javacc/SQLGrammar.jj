@@ -5435,9 +5435,9 @@ multiplicativeExpression(ValueNode farLeftOperand,
     BinaryOperatorNode.OperatorType multOp;
 }
 {
-    leftOperand = unaryExpression(null, null)
+    leftOperand = exponentiationExpression(null, null)
     ( multOp = multiplicativeOperator()
-        leftOperand = unaryExpression(leftOperand, multOp) 
+        leftOperand = exponentiationExpression(leftOperand, multOp)
     )*
     {
         if (farLeftOperand == null)
@@ -5471,6 +5471,25 @@ multiplicativeExpression(ValueNode farLeftOperand,
             assert false : "Unexpected operator value of " + additiveOperator;
             return null;
         }
+    }
+}
+
+ValueNode
+exponentiationExpression(ValueNode farLeftOperand,
+                         BinaryOperatorNode.OperatorType multiplicativeOperator)
+        throws StandardException :
+
+{
+    ValueNode leftOperand;
+    BinaryOperatorNode.OperatorType expOp;
+}
+{
+    leftOperand = unaryExpression(null, null)
+    ( <CARET>
+      leftOperand = unaryExpression(leftOperand, BinaryOperatorNode.OperatorType.EXP)
+    )*
+    {
+        return multOp(farLeftOperand, leftOperand, multiplicativeOperator);
     }
 }
 
@@ -5508,7 +5527,7 @@ multiplicativeOperator() throws StandardException :
 
 ValueNode
 unaryExpression(ValueNode farLeftOperand,
-                BinaryOperatorNode.OperatorType multiplicativeOperator) 
+                BinaryOperatorNode.OperatorType exponentiationOperator)
         throws StandardException :
 {
     ValueNode value;
@@ -5552,7 +5571,14 @@ unaryExpression(ValueNode farLeftOperand,
         else {
             assert (sign == null) : "Unknown unary operator '" + sign + "'";
         }
-        return multOp(farLeftOperand, value, multiplicativeOperator);
+
+        if (farLeftOperand == null)
+            return value;
+        else
+            return (ValueNode)nodeFactory.getNode(NodeTypes.BINARY_EXP_OPERATOR_NODE,
+                                                  farLeftOperand,
+                                                  value,
+                                                  parserContext);
     }
 }
 
