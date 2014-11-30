@@ -1353,15 +1353,10 @@ class SQLGrammar
      *
      * @exception StandardException
      */
-    StatementNode getUpdateNode(FromTable fromTable, TableName tableName,
+    StatementNode getUpdateNode(FromList fromList,
                                 ResultColumnList setClause, ValueNode whereClause, 
                                 ResultColumnList returningList)
             throws StandardException {
-        FromList fromList = (FromList)nodeFactory.getNode(NodeTypes.FROM_LIST,
-                                                          parserContext);
-
-        fromList.addFromTable(fromTable);
-
         SelectNode resultSet = (SelectNode)nodeFactory.getNode(NodeTypes.SELECT_NODE,
                                                                setClause,
                                                                null,
@@ -1374,7 +1369,7 @@ class SQLGrammar
 
         StatementNode retval =
             (StatementNode)nodeFactory.getNode(NodeTypes.UPDATE_NODE,
-                                               tableName,
+                                               null,
                                                resultSet,
                                                returningList,
                                                parserContext);
@@ -3266,14 +3261,15 @@ updateBody() throws StandardException :
 {
     ResultColumnList columnList;
     String correlationName = null;
-    TableName tableName = null;
     ValueNode whereClause = null;
     FromTable fromTable = null;
     Token whereToken = null;
     ResultColumnList returningList = null;
+
+    FromList fromList = null;
 }
 {
-    tableName = qualifiedName()
+    fromList = tableList()
     [
         LOOKAHEAD( { (getToken(1).kind != SET) } )
         [ <AS> ] correlationName = identifier() 
@@ -3289,24 +3285,7 @@ updateBody() throws StandardException :
     ]
     [ <RETURNING> returningList = selectList() ]
     {
-        /* Fabricate a ResultSetNode (SelectNode) under the UpdateNode.
-         * For a searched update,
-         * The FromList is simply the table that we are updating.
-         * For a positioned update,
-         * the FromList is a CurrentOfNode holding the cursor name.
-         * (NOTE - we mark the table as the one that we are updating.)
-         * The select list is the columns in the SET clause.    At bind time,
-            * we will prepend the CurrentRowLocation() in keeping with the design 
-         * decision that the parser's output should look like the language.
-         */
-        if (fromTable == null)
-            fromTable = (FromTable)nodeFactory.getNode(NodeTypes.FROM_BASE_TABLE,
-                                                       tableName,
-                                                       correlationName,
-                                                       FromBaseTable.UpdateOrDelete.UPDATE,
-                                                       parserContext);
-
-        return getUpdateNode(fromTable, tableName, columnList, whereClause, returningList);
+        return getUpdateNode(fromList, columnList, whereClause, returningList);
     }
 }
 
