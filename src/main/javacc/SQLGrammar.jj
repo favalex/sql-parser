@@ -1942,6 +1942,7 @@ TOKEN [IGNORE_CASE] :
 | <DIAGNOSTICS: "diagnostics">
 | <DISCONNECT: "disconnect">
 | <DISTINCT: "distinct">
+| <DISTINCTROW: "distinctrow">
 | <DOUBLE: "double">
 | <DROP: "drop">
 | <ELSE: "else">
@@ -4799,7 +4800,7 @@ querySpecification() throws StandardException :
 {
     ResultColumnList selectList;
     SelectNode selectNode;
-    boolean isDistinct = false;
+    SetQuantifier setQuantifier = SetQuantifier.ALL;
     Token straightJoin = null;
     Boolean cacheHint = null;
 }
@@ -4807,7 +4808,7 @@ querySpecification() throws StandardException :
     <SELECT> 
     [ LOOKAHEAD( { straightJoinFollows() } )
       straightJoin = <STRAIGHT_JOIN> ]
-    [ isDistinct = setQuantifier() ]
+    [ setQuantifier = querySetQuantifier() ]
     [ LOOKAHEAD( { (straightJoin == null) && straightJoinFollows() } )
       straightJoin = <STRAIGHT_JOIN> ]
     [ LOOKAHEAD( { cacheHintFollows() } )
@@ -4815,10 +4816,31 @@ querySpecification() throws StandardException :
     selectList = selectList()
     selectNode = tableExpression(selectList)
     {
-        if (isDistinct) selectNode.makeDistinct();
+        selectNode.setSetQuantifier(setQuantifier);
         if (straightJoin != null) selectNode.makeStraightJoin();
         if (cacheHint != null) selectNode.setCacheHint(cacheHint);
         return selectNode;
+    }
+}
+
+SetQuantifier
+querySetQuantifier() :
+{}
+{
+    <DISTINCTROW>
+    {
+        return SetQuantifier.DISTINCTROW;
+    }
+|
+    <DISTINCT>
+    {
+        forbidNextValueFor();
+        return SetQuantifier.DISTINCT;
+    }
+|
+    <ALL>
+    {
+        return SetQuantifier.ALL;
     }
 }
 
