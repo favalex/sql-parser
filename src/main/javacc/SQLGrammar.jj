@@ -2686,6 +2686,13 @@ TOKEN :
     "`">
 }
 
+TOKEN :
+{
+  <BRACKET_IDENTIFIER: "["
+  (~["]"]) +
+  "]">
+}
+
 MORE :
 {
   "\"" { SwitchTo(parser.hasFeature(SQLParserFeature.DOUBLE_QUOTED_STRING) ?
@@ -14165,6 +14172,11 @@ delimitedIdentifier() throws StandardException :
 }
 {
 (
+    tok = <BRACKET_IDENTIFIER>
+    {
+        str = tok.image.substring(1, tok.image.length() - 1);
+    }
+|
     tok = <DOUBLEQUOTED_IDENTIFIER>
     {
         // Strip quotes and correct interior ones.
