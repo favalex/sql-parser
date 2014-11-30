@@ -1325,15 +1325,10 @@ class SQLGrammar
      *
      * @exception StandardException
      */
-    StatementNode getDeleteNode(FromTable fromTable, TableName tableName,
+    StatementNode getDeleteNode(FromList fromList,
                                 ValueNode whereClause,
                                 ResultColumnList returningList)
             throws StandardException {
-        FromList fromList = (FromList)nodeFactory.getNode(NodeTypes.FROM_LIST,
-                                                          parserContext);
-
-        fromList.addFromTable(fromTable);
-
         SelectNode resultSet = (SelectNode)nodeFactory.getNode(NodeTypes.SELECT_NODE,
                                                                null,
                                                                null, /* AGGREGATE list */
@@ -1345,7 +1340,7 @@ class SQLGrammar
                                                                parserContext);
 
         StatementNode retval = (StatementNode)nodeFactory.getNode(NodeTypes.DELETE_NODE,
-                                                                  tableName,
+                                                                  null,
                                                                   resultSet,
                                                                   returningList,
                                                                   parserContext);
@@ -3129,15 +3124,17 @@ StatementNode
 deleteBody() throws StandardException :
 {
     String correlationName = null;
-    TableName tableName = null;
     ValueNode whereClause = null;
     FromTable fromTable = null;
     QueryTreeNode retval;
     Token whereToken = null;
     ResultColumnList returningList = null;
+
+    FromList fromList = null;
 }
 {
-    <FROM> tableName = qualifiedName() 
+    [ selectList() ]
+    <FROM> fromList = tableList()
     [ 
         LOOKAHEAD( { (getToken(1).kind != EOF) && (getToken(1).kind != SEMICOLON) && 
         		(getToken(1).kind != WHERE) &&
@@ -3156,24 +3153,7 @@ deleteBody() throws StandardException :
     ]
     [ <RETURNING> returningList = selectList() ]
     {
-        /* Fabricate a ResultSetNode (SelectNode) under the DeleteNode.
-         * For a searched delete, The FromList is simply the table that we
-         * are deleting from.
-         * (NOTE - we mark the table as the one that we are deleting
-         * from.)    For a positioned delete, the FromList is a
-         * CurrentOfNode holding the cursor name.    The select list will be
-         * null for now.    We will generate it at bind time, in keeping
-         * with the design decision that the parser's output should look
-         * like the language.
-         */
-        if (fromTable == null)
-            fromTable = (FromTable)nodeFactory.getNode(NodeTypes.FROM_BASE_TABLE,
-                                                       tableName,
-                                                       correlationName,
-                                                       FromBaseTable.UpdateOrDelete.DELETE,
-                                                       parserContext);
-
-        return getDeleteNode(fromTable, tableName, whereClause, returningList);
+        return getDeleteNode(fromList, whereClause, returningList);
     }
 }
 
