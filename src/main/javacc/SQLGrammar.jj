@@ -8137,6 +8137,18 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 FromList
 fromClause() throws StandardException :
 {
+    FromList fromList;
+}
+{
+    <FROM> fromList = tableList()
+    {
+        return fromList;
+    }
+}
+
+FromList
+tableList() throws StandardException :
+{
     FromList fromList = (FromList)nodeFactory.getNode(NodeTypes.FROM_LIST,
                                                       true, // nodeFactory.doJoinOrderOptimization()
                                                       parserContext);
@@ -8144,7 +8156,7 @@ fromClause() throws StandardException :
     Token beginToken, endToken;
 }
 {
-    <FROM> { beginToken = getToken(1); }
+    { beginToken = getToken(1); }
     tableReferences(fromList)
     ( <COMMA> tableReferences(fromList) )* { endToken = getToken(0); }
     {
