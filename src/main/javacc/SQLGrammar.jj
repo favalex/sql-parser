@@ -2765,6 +2765,7 @@ TOKEN :
   /* TODO: does not allow multiple ' ... ' sequences with space separators. */
 | <HEX_STRING: ["X","x"] "'" (["0"-"9","a"-"f","A"-"F"])*"'">
 | <APPROXIMATE_NUMERIC: <EXACT_NUMERIC> ["e","E"] ( ("+" | "-") )? ( ["0" - "9"] )+ >
+| <DATE_LITERAL: "#" ("1")? ["0"-"9"] "/" (["1"-"3"])? ["0"-"9"] "/" (["0"-"9"])+ "#" >
 /*****
     The tokenizer can't handle the date/time literals because
     they are constructed of two tokens with arbitrary whitespace between them.
@@ -10869,6 +10870,12 @@ dateTimeLiteral() throws StandardException :
         return constantNode;
     }
 |
+    constantNode = dateLiteral()
+    {
+        return constantNode;
+    }
+|
+
     // This LOOKAHEAD is needed because DATE, etc. are also function names that do
     // the same thing, but with an arbitrary expression.
     LOOKAHEAD( { isDATETIME(getToken(1).kind) && getToken(2).kind == SINGLEQUOTED_STRING } )
@@ -10900,6 +10907,22 @@ escapedDateTimeLiteral() throws StandardException :
     <TS> constantNode = bareTimestampLiteral()
     {
         return constantNode;
+    }
+}
+
+ValueNode
+dateLiteral() throws StandardException :
+{
+    Token tok;
+}
+{
+    tok = <DATE_LITERAL>
+    {
+        String[] parts = tok.image.substring(1, tok.image.length()-1).split("/");
+        String dateString = String.join("-", new String[] {parts[2], parts[0], parts[1]});
+        return (ValueNode)nodeFactory.getNode(NodeTypes.USERTYPE_CONSTANT_NODE,
+                                              Date.valueOf(dateString),
+                                              parserContext);
     }
 }
 
